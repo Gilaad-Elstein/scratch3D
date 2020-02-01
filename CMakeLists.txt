@@ -10,7 +10,7 @@ find_package(raylib 2.5) # Let CMake search for a raylib-config.cmake
 file(COPY Resources DESTINATION  ${CMAKE_CURRENT_BINARY_DIR})
 
 
-add_executable(scratch3D main.cpp Engine.cpp Engine.h Vec3d.cpp Vec3d.h ObjectMesh.cpp ObjectMesh.h Polygon.cpp Polygon.h)
+add_executable(scratch3D main.cpp Engine.cpp Engine.h Vec3d.cpp Vec3d.h MeshObject.cpp MeshObject.h Matrix4x4.cpp Matrix4x4.h Graphics.cpp Graphics.h)
 #set(raylib_VERBOSE 1)
 target_link_libraries(scratch3D raylib  X11)
 

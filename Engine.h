@@ -6,12 +6,12 @@
 #define SCRATCH3D_ENGINE_H
 
 
-#include "Polygon.h"
+#include <raylib.h>
+#include "MeshObject.h"
 
 class Engine {
 public:
-    static void Run();
-    static void TextureMapViewer();
+    static void run();
 };
 
 
