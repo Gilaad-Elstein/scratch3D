@@ -2,13 +2,13 @@
 // Created by gilaad on 1/22/20.
 //
 
-#ifndef INC_3DEDU_MATRIX4X4_H
-#define INC_3DEDU_MATRIX4X4_H
+#ifndef SCRATCH3D__MATRIX4X4_H
+#define SCRATCH3D__MATRIX4X4_H
 
 
-#include "Vec3d.h"
+#include "Vec3.h"
 
-struct Vec3d;
+struct Vec3;
 
 struct Matrix4x4
 {
@@ -23,8 +23,8 @@ struct Matrix4x4
     static Matrix4x4 MakeXRotationMatrix(float angle);
     static Matrix4x4 MakeYRotationMatrix(float angle);
     static Matrix4x4 MakeZRotationMatrix(float angle);
-    static Matrix4x4 MakeTranslationMatrix(Vec3d vTranslation);
-    static Matrix4x4 MakePointAtMatrix(Vec3d &pos, Vec3d &target, Vec3d &up);
+    static Matrix4x4 MakeTranslationMatrix(Vec3 vTranslation);
+    static Matrix4x4 MakePointAtMatrix(Vec3 &pos, Vec3 &target, Vec3 &up);
     static Matrix4x4 MakeInverseMatrix(const Matrix4x4 &matrix);
     static Matrix4x4 MakeProjectionMatrix(float focalLength,
                                           float xResolution,
@@ -34,4 +34,4 @@ struct Matrix4x4
 
 };
 
-#endif //INC_3DEDU_MATRIX4X4_H
+#endif //INC_SCRATCH3D_MATRIX4X4_H

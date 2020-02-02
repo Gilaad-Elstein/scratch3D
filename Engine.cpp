@@ -3,11 +3,14 @@
 //
 
 #include "Engine.h"
-#include "MeshObject.h"
+#include "Mesh.h"
 #include <raylib.h>
 #include <vector>
 #include <tuple>
 #include "Graphics.h"
+#include "Texture.h"
+
+using Scratch3d::TransformedFace;
 
 const int WINDOWED_RESOLUTION_WIDTH = 640;
 //const int WINDOWED_RESOLUTION_HEIGHT = 480;
@@ -41,28 +44,39 @@ void Engine::run(){
     fullscreen = true;
     bool drawMesh = true;
 
-    std::vector<MeshObject> meshList;
-//    meshList.emplace_back(MeshObject::GetTestCube(0.25));
-    meshList.emplace_back(MeshObject::GetMeshFromObjectFile("Resources/head.obj"));
-    float rotationRate = 0.25;
-    float offsetRate = 0.3;
-    float theta = 0;
+    std::vector<Scratch3d::Mesh> meshList;
+    std::vector<Scratch3d::Texture> texList;
+//    meshList.emplace_back(Scratch3d::Mesh::GetTestCube(0.33));
+//    texList.emplace_back(Scratch3d::Texture("Resources/simpleTexture.jpg"));
+    meshList.emplace_back(Scratch3d::Mesh::GetMeshFromObjectFile("Resources/head.obj"));
+    meshList[0].rotateRaw(0, 0, 0);
+    float rotationRate = 0.5;
+    float offsetRate = 0.1;
+    float thetaX = 0;
+    float thetaY = 0;
+    float thetaZ = 0;
     float offset = 2.0f;
 
     while (!WindowShouldClose()) {
-        theta += rotationRate * GetFrameTime();
-//        offset += offsetRate * GetFrameTime();
+        if (IsKeyDown(KEY_UP)) thetaX -= rotationRate * GetFrameTime();
+        if (IsKeyDown(KEY_DOWN)) thetaX += rotationRate * GetFrameTime();
+        if (IsKeyDown(KEY_LEFT)) thetaY -= rotationRate * GetFrameTime();
+        if (IsKeyDown(KEY_RIGHT)) thetaY += rotationRate * GetFrameTime();
+        if (IsKeyDown(KEY_Z)) thetaZ -= rotationRate * GetFrameTime();
+        if (IsKeyDown(KEY_X)) thetaZ += rotationRate * GetFrameTime();
         ClearBackground(BLACK);
         BeginDrawing();
         for(auto& mesh : meshList){
             mesh.resetTransformations();
-            mesh.rotate(theta, theta / 3, theta / 5);
+            mesh.rotate(thetaX, thetaY, thetaZ);
             mesh.translate(0, 0, offset);
+            mesh.cullBackFaces();
             mesh.transform(GetScreenWidth(), GetScreenHeight());
+
         }
         for(auto& mesh : meshList) {
             std::vector<TransformedFace> faces =  mesh.getTransformedFaces();
-            for(auto const& face : faces){
+            for(auto & face : faces){
                 Graphics::drawFaceFilled(face, FILLCOLOR);
             }
             if (drawMesh){

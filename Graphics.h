@@ -7,16 +7,19 @@
 
 
 #include <raylib.h>
-#include "Vec3d.h"
-#include "MeshObject.h"
+#include "Vec3.h"
+#include "Mesh.h"
+#include "Texture.h"
+
+using Scratch3d::TransformedFace;
 
 class Graphics {
 public:
     static void TintColor(Color &c, float dp);
-    static void DrawLine(Vec3d p1, Vec3d p2, Color& color);
+    static void DrawLine(Vec3 p1, Vec3 p2, Color& color);
     static void drawFaceLines(TransformedFace face, Color color);
-    static void drawFaceFilled(TransformedFace face, Color color);
-
+    static void drawFaceFilled(TransformedFace& face, Color color);
+//    static void DrawTriangleTex( const Vec2& v0,const Vec2& v1,const Vec2& v2, Scratch3d::Texture tex );
 };
 
 

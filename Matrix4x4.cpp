@@ -18,10 +18,10 @@ Matrix4x4 Matrix4x4::MakeXRotationMatrix(float angle)
 {
     Matrix4x4 matrix;
     matrix.m[0][0] = 1.0;
-    matrix.m[1][1] = cos(angle);
-    matrix.m[1][2] = sin(angle);
-    matrix.m[2][1] = -sin(angle);
-    matrix.m[2][2] = cos(angle);
+    matrix.m[1][1] = cosf(angle);
+    matrix.m[1][2] = sinf(angle);
+    matrix.m[2][1] = -sinf(angle);
+    matrix.m[2][2] = cosf(angle);
     matrix.m[3][3] = 1.0;
     return matrix;
 }
@@ -29,11 +29,11 @@ Matrix4x4 Matrix4x4::MakeXRotationMatrix(float angle)
 Matrix4x4 Matrix4x4::MakeYRotationMatrix(float angle)
 {
     Matrix4x4 matrix;
-    matrix.m[0][0] = cos(angle);
-    matrix.m[0][2] = sin(angle);
-    matrix.m[2][0] = -sin(angle);
+    matrix.m[0][0] = cosf(angle);
+    matrix.m[0][2] = sinf(angle);
+    matrix.m[2][0] = -sinf(angle);
     matrix.m[1][1] = 1.0;
-    matrix.m[2][2] = cos(angle);
+    matrix.m[2][2] = cosf(angle);
     matrix.m[3][3] = 1.0;
     return matrix;
 }
@@ -41,16 +41,16 @@ Matrix4x4 Matrix4x4::MakeYRotationMatrix(float angle)
 Matrix4x4 Matrix4x4::MakeZRotationMatrix(float angle)
 {
     Matrix4x4 matrix;
-    matrix.m[0][0] = cos(angle);
-    matrix.m[0][1] = sin(angle);
-    matrix.m[1][0] = -sin(angle);
-    matrix.m[1][1] = cos(angle);
+    matrix.m[0][0] = cosf(angle);
+    matrix.m[0][1] = sinf(angle);
+    matrix.m[1][0] = -sinf(angle);
+    matrix.m[1][1] = cosf(angle);
     matrix.m[2][2] = 1.0;
     matrix.m[3][3] = 1.0;
     return matrix;
 }
 
-Matrix4x4 Matrix4x4::MakeTranslationMatrix(Vec3d vTranslation)
+Matrix4x4 Matrix4x4::MakeTranslationMatrix(Vec3 vTranslation)
 {
     Matrix4x4 matrix;
     matrix.m[0][0] = 1.0;
@@ -70,8 +70,8 @@ Matrix4x4 Matrix4x4::MakeProjectionMatrix(float focalLength,
                                           int height)
 {
     Matrix4x4 matrix;
-    matrix.m[0][0] = focalLength * width / (2 * xResolution);
-    matrix.m[1][1] = focalLength * height / (2 * yResolution);
+    matrix.m[0][0] = focalLength * (float)width / (2 * xResolution);
+    matrix.m[1][1] = focalLength * (float)height / (2 * yResolution);
     matrix.m[0][1] = 0; //Skew
     matrix.m[0][2] = 0; //Principle point X offset
     matrix.m[1][2] = 0; //Principle point Y offset
@@ -104,16 +104,16 @@ Matrix4x4 Matrix4x4::Clone() const {
     return clone;
 }
 
-Matrix4x4 Matrix4x4::MakePointAtMatrix(Vec3d &pos, Vec3d &target, Vec3d &up) {
-    Vec3d newForward = target - pos;
+Matrix4x4 Matrix4x4::MakePointAtMatrix(Vec3 &pos, Vec3 &target, Vec3 &up) {
+    Vec3 newForward = target - pos;
     newForward.Normalise();
 
-    Vec3d a = newForward * up.DotProduct(newForward);
+    Vec3 a = newForward * up.DotProduct(newForward);
     up -= a;
-    Vec3d newUp = up;
+    Vec3 newUp = up;
     newUp.Normalise();
 
-    Vec3d newRight = newUp.CrossProduct(newForward);
+    Vec3 newRight = newUp.CrossProduct(newForward);
 
     // Dimensioning and translation matrix
     Matrix4x4 matrix;

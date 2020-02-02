@@ -7,7 +7,7 @@
 
 
 #include <raylib.h>
-#include "MeshObject.h"
+#include "Mesh.h"
 
 class Engine {
 public:
