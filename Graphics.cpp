@@ -83,10 +83,8 @@ void Graphics::drawFaceFilled(TransformedFace& face, Color color) {
     {
         for (int i =  minY; i <= midY; i++)
         {
-            int ax = face.vertices[0].x + (i - face.vertices[0].y) * dax_step;
-            int bx = face.vertices[0].x + (i - face.vertices[0].y) * dbx_step;
-            if (i == minY) ax = face.vertices[0].x;
-            if (i == midY) ax = face.vertices[1].x;
+            int ax = face.vertices[0].x + (int)(i - face.vertices[0].y) * dax_step;
+            int bx = face.vertices[0].x + (int)(i - face.vertices[0].y) * dbx_step;
 
             if (ax > bx) std::swap(ax, bx);
 
@@ -107,8 +105,8 @@ void Graphics::drawFaceFilled(TransformedFace& face, Color color) {
     {
         for (int i = midY; i < maxY; i++)
         {
-            int ax = face.vertices[1].x + (i - face.vertices[1].y) * dax_step;
-            int bx = face.vertices[0].x + (i - face.vertices[0].y) * dbx_step;
+            int ax = face.vertices[1].x + (int)(i - face.vertices[1].y) * dax_step;
+            int bx = face.vertices[0].x + (int)(i - face.vertices[0].y) * dbx_step;
             if (i == midY) ax = face.vertices[1].x;
 
             if (ax > bx) std::swap(ax, bx);
@@ -181,10 +179,8 @@ void Graphics::drawFaceTextured(TransformedFace &face, Scratch3d::Texture &textu
     {
         for (int i =  minY; i <= midY; i++)
         {
-            int ax = face.vertices[0].x + (i - face.vertices[0].y) * dax_step;
-            int bx = face.vertices[0].x + (i - face.vertices[0].y) * dbx_step;
-            if (i == minY) ax = face.vertices[0].x;
-            if (i == midY) ax = face.vertices[1].x;
+            int ax = face.vertices[0].x + (int)(i - face.vertices[0].y) * dax_step;
+            int bx = face.vertices[0].x + (int)(i - face.vertices[0].y) * dbx_step;
 
             float tex_su = face.texCoords[0].u + (float)(i - face.vertices[0].y) * du1_step;
             float tex_sv = face.texCoords[0].v + (float)(i - face.vertices[0].y) * dv1_step;
@@ -250,9 +246,9 @@ void Graphics::drawFaceTextured(TransformedFace &face, Scratch3d::Texture &textu
     {
         for (int i = midY; i < maxY; i++)
         {
-            int ax = face.vertices[1].x + (i - face.vertices[1].y) * dax_step;
-            int bx = face.vertices[0].x + (i - face.vertices[0].y) * dbx_step;
-            if (i == midY) ax = face.vertices[1].x;
+            int ax = face.vertices[1].x + (int)(i - face.vertices[1].y) * dax_step;
+            int bx = face.vertices[0].x + (int)(i - face.vertices[0].y) * dbx_step;
+
 
             float tex_su = face.texCoords[1].u + (float)(i - face.vertices[1].y) * du1_step;
             float tex_sv = face.texCoords[1].v + (float)(i - face.vertices[1].y) * dv1_step;

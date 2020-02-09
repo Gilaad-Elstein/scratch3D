@@ -21,7 +21,7 @@ const int FULLSCREEN_RESOLUTION_WIDTH = 1440;
 const int FULLSCREEN_RESOLUTION_HEIGHT = 900;
 
 Color MESHCOLOR = WHITE;
-Color FILLCOLOR = LIGHTGRAY;
+Color FILLCOLOR = GRAY;
 
 std::string DEBUG_MSG;
 bool fullscreen;
@@ -48,11 +48,11 @@ void Engine::run(){
 
     std::vector<Scratch3d::Mesh> meshList;
     std::vector<Scratch3d::Texture> texList;
-    meshList.emplace_back(Scratch3d::Mesh::GetTestCube(0.65));
-    texList.emplace_back(Scratch3d::Texture("Resources/TEST_TEXTURE.png"));
+//    meshList.emplace_back(Scratch3d::Mesh::GetTestCube(0.65));
+//    texList.emplace_back(Scratch3d::Texture("Resources/TEST_TEXTURE.png"));
 //    texList.emplace_back(Scratch3d::Texture("Resources/simpleTexture.jpg"));
-//    meshList.emplace_back(Scratch3d::Mesh::GetMeshFromObjectFile("Resources/head.obj"));
-//    texList.emplace_back(Scratch3d::Texture("Resources/head_diffuse.tga"));
+    meshList.emplace_back(Scratch3d::Mesh::GetMeshFromObjectFile("Resources/head.obj"));
+    texList.emplace_back(Scratch3d::Texture("Resources/head_diffuse.tga"));
     meshList[0].invertRawXY();
 
     float rotationRate = 0.5;
@@ -77,7 +77,6 @@ void Engine::run(){
             mesh.translate(0, 0, 2);
             mesh.cullBackFaces();
             mesh.transform(GetScreenWidth(), GetScreenHeight());
-
         }
 
         for(auto& mesh : meshList) {
