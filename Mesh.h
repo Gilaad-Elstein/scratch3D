@@ -22,6 +22,7 @@ namespace Scratch3d{
 
     struct TransformedFace{
         std::vector<Vec3> vertices;
+        std::vector<Vec2> texCoords;
     };
 
     class Mesh {
@@ -38,11 +39,12 @@ namespace Scratch3d{
         void transform(int w, int h);
         void cullBackFaces();
         std::vector<TransformedFace> getTransformedFaces();
-        std::vector<float> illumDPs;
+        void invertRawXY();
 
         static Mesh GetTestCube(float size);
         static Mesh GetMeshFromObjectFile(const std::string &sFilename);
 
+        void transformNoPerspective(int w, int h);
     };
 
 }

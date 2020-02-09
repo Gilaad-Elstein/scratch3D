@@ -12,6 +12,8 @@
 
 using Scratch3d::TransformedFace;
 
+float MESH_VIEW_SIZE_FACTOR = 0.25f;
+
 const int WINDOWED_RESOLUTION_WIDTH = 640;
 //const int WINDOWED_RESOLUTION_HEIGHT = 480;
 const int WINDOWED_RESOLUTION_HEIGHT = 640;
@@ -42,18 +44,21 @@ void Engine::run(){
     SetConfigFlags(FLAG_VSYNC_HINT | FLAG_WINDOW_UNDECORATED);
     InitWindow(WINDOWED_RESOLUTION_WIDTH, WINDOWED_RESOLUTION_HEIGHT, "scratch3D");
     fullscreen = true;
-    bool drawMesh = true;
+    bool drawMesh = false;
 
     std::vector<Scratch3d::Mesh> meshList;
     std::vector<Scratch3d::Texture> texList;
-//    meshList.emplace_back(Scratch3d::Mesh::GetTestCube(0.33));
+    meshList.emplace_back(Scratch3d::Mesh::GetTestCube(0.65));
+    texList.emplace_back(Scratch3d::Texture("Resources/TEST_TEXTURE.png"));
 //    texList.emplace_back(Scratch3d::Texture("Resources/simpleTexture.jpg"));
-    meshList.emplace_back(Scratch3d::Mesh::GetMeshFromObjectFile("Resources/head.obj"));
-    meshList[0].rotateRaw(0, 0, 0);
+//    meshList.emplace_back(Scratch3d::Mesh::GetMeshFromObjectFile("Resources/head.obj"));
+//    texList.emplace_back(Scratch3d::Texture("Resources/head_diffuse.tga"));
+    meshList[0].invertRawXY();
+
     float rotationRate = 0.5;
     float offsetRate = 0.1;
     float thetaX = 0;
-    float thetaY = 0;
+    float thetaY = M_PI;
     float thetaZ = 0;
     float offset = 2.0f;
 
@@ -69,15 +74,17 @@ void Engine::run(){
         for(auto& mesh : meshList){
             mesh.resetTransformations();
             mesh.rotate(thetaX, thetaY, thetaZ);
-            mesh.translate(0, 0, offset);
+            mesh.translate(0, 0, 2);
             mesh.cullBackFaces();
             mesh.transform(GetScreenWidth(), GetScreenHeight());
 
         }
+
         for(auto& mesh : meshList) {
             std::vector<TransformedFace> faces =  mesh.getTransformedFaces();
             for(auto & face : faces){
-                Graphics::drawFaceFilled(face, FILLCOLOR);
+                if (face.texCoords.empty()) Graphics::drawFaceFilled(face, FILLCOLOR);
+                else Graphics::drawFaceTextured(face, texList[0]);
             }
             if (drawMesh){
                 for(auto const& face : faces){
@@ -85,6 +92,7 @@ void Engine::run(){
                 }
             }
         }
+
         DrawText(DEBUG_MSG.c_str(), 100, 100, 16, WHITE);
         if(IsKeyPressed(KEY_M)) drawMesh = !drawMesh;
         EndDrawing();

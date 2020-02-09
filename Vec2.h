@@ -9,6 +9,9 @@
 struct Vec2 {
     float u;
     float v;
+    float w = 1;
+
+    Vec2(float u, float v);
 
     Vec2 operator-(const Vec2 &other) const;
     Vec2 operator+(const Vec2 &other) const;

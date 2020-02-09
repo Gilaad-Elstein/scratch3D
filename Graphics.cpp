@@ -4,47 +4,8 @@
 
 #include <cmath>
 #include "Graphics.h"
+#include "Logger.h"
 
-Vec3 interpolate(const Vec3& src, const Vec3& dst,float alpha )
-{
-    return src + (dst - src) * alpha;
-}
-void drawFlatTopTriangle(Vec3 p0, Vec3 p1, Vec3 p2, Color color){
-    //slopes
-    float m0 = (p2.x - p0.x) / (p2.y - p0.y);
-    float m1 = (p2.x - p1.x) / (p2.y - p1.y);
-    //to pixel space
-    int minY = (int)std::ceil(p0.y - 0.5f);
-    int maxY = (int)std::ceil(p2.y - 0.5f);
-    for(int y = minY; y < maxY; ++y) {
-        //to pixel space
-        float fMinX = m0 * ((float)y + 0.5f - p0.y) + p0.x;
-        float fMaxX = m1 * ((float)y + 0.5f - p1.y) + p1.x;
-        int minX = (int)std::ceil(fMinX - 0.5f );
-        int maxX = (int)std::ceil(fMaxX - 0.5f );
-        for (int x = minX; x < maxX; ++x) {
-            DrawPixel(x, y, color);
-        }
-    }
-}
-void drawFlatBottomTriangle(Vec3 p0, Vec3 p1, Vec3 p2, Color color){
-    //slopes
-    float m0 = (p1.x - p0.x) / (p1.y - p0.y);
-    float m1 = (p2.x - p0.x) / (p2.y - p0.y);
-    //to pixel space
-    int minY = (int)std::ceil(p0.y - 0.5f);
-    int maxY = (int)std::ceil(p2.y - 0.5f);
-    for(int y = minY; y < maxY; ++y) {
-        //to pixel space
-        float fMinX = m0 * ((float)y + 0.5f - p0.y) + p0.x;
-        float fMaxX = m1 * ((float)y + 0.5f - p0.y) + p0.x;
-        int minX = (int)std::ceil(fMinX - 0.5f );
-        int maxX = (int)std::ceil(fMaxX - 0.5f );
-        for (int x = minX; x < maxX; ++x) {
-            DrawPixel(x, y, color);
-        }
-    }
-}
 
 void Graphics::TintColor(Color &c, float dp) {
     c.r = static_cast<unsigned char>(static_cast<float>(c.r)*dp);
@@ -58,7 +19,9 @@ void Graphics::TintColor(Color &c, float dp) {
     if (c.b > 255) {c.b = 255;}
     else if (c.b < 0) {c.b = 0;}
 }
+
 void Graphics::DrawLine(Vec3 p1, Vec3 p2, Color &color) {
+
     bool steep = false;
     //invert steep lines
     if (std::abs(p1.x - p2.x) < std::abs(p1.y - p2.y)) {
@@ -97,44 +60,244 @@ void Graphics::drawFaceLines(TransformedFace face, Color color) {
 }
 
 void Graphics::drawFaceFilled(TransformedFace& face, Color color) {
-    // get pointers so we can use std::swap for sorting
-    const Vec3* pv0 = &face.vertices[0];
-    const Vec3* pv1 = &face.vertices[1];
-    const Vec3* pv2 = &face.vertices[2];
+    if (face.vertices[1].y < face.vertices[0].y) std::swap(face.vertices[1], face.vertices[0]);
+    if (face.vertices[2].y < face.vertices[0].y) std::swap(face.vertices[2], face.vertices[0]);
+    if (face.vertices[2].y < face.vertices[1].y) std::swap(face.vertices[2], face.vertices[1]);
 
-    // sort by y
-    if( pv1->y < pv0->y ) std::swap( pv0,pv1 );
-    if( pv2->y < pv1->y ) std::swap( pv1,pv2 );
-    if( pv1->y < pv0->y ) std::swap( pv0,pv1 );
+    int minY = face.vertices[0].y;
+    int midY = face.vertices[1].y;
+    int maxY = face.vertices[2].y;
 
-    if( pv0->y == pv1->y ) // natural flat top
-    {
-        // sort by x
-        if( pv1->x < pv0->x ) std::swap(pv0,pv1);
-        drawFlatTopTriangle(*pv0,*pv1,*pv2, color);
-    }
-    else if( pv1->y == pv2->y ) // flat bottom
-    {
-        // sort by x
-        if( pv2->x < pv1->x ) std::swap( pv1,pv2 );
-        drawFlatBottomTriangle(*pv0,*pv1,*pv2, color);
-    }
-    else // none flat, split to flat triangles
-    {
-        // splitting ratio and interpolation
-        const float ratio =
-                (pv1->y - pv0->y) /
-                (pv2->y - pv0->y);
-        Vec3 vi = interpolate(*pv0, *pv2, ratio);
+    int dy1 = face.vertices[1].y - face.vertices[0].y;
+    int dx1 = face.vertices[1].x - face.vertices[0].x;
 
-        if( pv1->x < vi.x ) // right heavy triangle
+    int dy2 =  face.vertices[2].y - face.vertices[0].y;
+    int dx2 =  face.vertices[2].x - face.vertices[0].x;
+
+    float dax_step = 0, dbx_step = 0;
+
+    if (dy1) dax_step = dx1 / (float)abs(dy1);
+    if (dy2) dbx_step = dx2 / (float)abs(dy2);
+
+    if (dy1)
+    {
+        for (int i =  minY; i <= midY; i++)
         {
-            drawFlatBottomTriangle(*pv0, *pv1, vi, color);
-            drawFlatTopTriangle(*pv1, vi, *pv2, color);
+            int ax = face.vertices[0].x + (i - face.vertices[0].y) * dax_step;
+            int bx = face.vertices[0].x + (i - face.vertices[0].y) * dbx_step;
+            if (i == minY) ax = face.vertices[0].x;
+            if (i == midY) ax = face.vertices[1].x;
+
+            if (ax > bx) std::swap(ax, bx);
+
+            for (int j = ax; j <= bx; j++)
+            {
+                DrawPixel(j, i, color);
+            }
         }
-        else // left heavy triangle
+    }
+
+    dy1 = face.vertices[2].y - face.vertices[1].y;
+    dx1 = face.vertices[2].x - face.vertices[1].x;
+
+    if (dy1) dax_step = dx1 / (float)abs(dy1);
+    if (dy2) dbx_step = dx2 / (float)abs(dy2);
+
+    if (dy1)
+    {
+        for (int i = midY; i < maxY; i++)
         {
-            drawFlatBottomTriangle(*pv0, vi, *pv1, color);
-            drawFlatTopTriangle(vi, *pv1, *pv2, color);}
+            int ax = face.vertices[1].x + (i - face.vertices[1].y) * dax_step;
+            int bx = face.vertices[0].x + (i - face.vertices[0].y) * dbx_step;
+            if (i == midY) ax = face.vertices[1].x;
+
+            if (ax > bx) std::swap(ax, bx);
+
+            for (int j = ax; j <= bx; j++)
+            {
+                DrawPixel(j, i, color);
+            }
+        }
+    }
+}
+
+void Graphics::drawFaceTextured(TransformedFace &face, Scratch3d::Texture &texture) {
+
+    face.texCoords[0].w = face.vertices[0].w;
+    face.texCoords[1].w = face.vertices[1].w;
+    face.texCoords[2].w = face.vertices[2].w;
+
+    if (face.vertices[1].y < face.vertices[0].y) {
+        std::swap(face.vertices[1], face.vertices[0]);
+        std::swap(face.texCoords[1], face.texCoords[0]);
+    }
+    if (face.vertices[2].y < face.vertices[0].y){
+        std::swap(face.vertices[2], face.vertices[0]);
+        std::swap(face.texCoords[2], face.texCoords[0]);
+    }
+    if (face.vertices[2].y < face.vertices[1].y){
+        std::swap(face.vertices[2], face.vertices[1]);
+        std::swap(face.texCoords[2], face.texCoords[1]);
+    }
+
+
+
+    int minY = face.vertices[0].y;
+    int midY = face.vertices[1].y;
+    int maxY = face.vertices[2].y;
+
+    int dy1 = face.vertices[1].y - face.vertices[0].y;
+    int dx1 = face.vertices[1].x - face.vertices[0].x;
+    float dv1 = face.texCoords[1].v - face.texCoords[0].v;
+    float du1 = face.texCoords[1].u - face.texCoords[0].u;
+    float dw1 = face.texCoords[1].w - face.texCoords[0].w;
+
+    int dy2 =  face.vertices[2].y - face.vertices[0].y;
+    int dx2 =  face.vertices[2].x - face.vertices[0].x;
+    float dv2 = face.texCoords[2].v - face.texCoords[0].v;
+    float du2 = face.texCoords[2].u - face.texCoords[0].u;
+    float dw2 = face.texCoords[2].w = face.texCoords[0].w;
+
+    float tex_u, tex_v, tex_w;
+
+    float dax_step = 0, dbx_step = 0,
+            du1_step = 0, dv1_step = 0,
+            du2_step = 0, dv2_step = 0,
+            dw1_step=0, dw2_step=0;
+
+
+    if (dy1) dax_step = dx1 / (float)abs(dy1);
+    if (dy2) dbx_step = dx2 / (float)abs(dy2);
+
+    if (dy1) du1_step = du1 / (float)abs(dy1);
+    if (dy1) dv1_step = dv1 / (float)abs(dy1);
+    if (dy1) dw1_step = dw1 / (float)abs(dy1);
+
+    if (dy2) du2_step = du2 / (float)abs(dy2);
+    if (dy2) dv2_step = dv2 / (float)abs(dy2);
+    if (dy2) dw2_step = dw2 / (float)abs(dy2);
+
+    if (dy1)
+    {
+        for (int i =  minY; i <= midY; i++)
+        {
+            int ax = face.vertices[0].x + (i - face.vertices[0].y) * dax_step;
+            int bx = face.vertices[0].x + (i - face.vertices[0].y) * dbx_step;
+            if (i == minY) ax = face.vertices[0].x;
+            if (i == midY) ax = face.vertices[1].x;
+
+            float tex_su = face.texCoords[0].u + (float)(i - face.vertices[0].y) * du1_step;
+            float tex_sv = face.texCoords[0].v + (float)(i - face.vertices[0].y) * dv1_step;
+            float tex_sw = face.texCoords[0].w + (float)(i - face.vertices[0].y) * dw1_step;
+
+            float tex_eu = face.texCoords[0].u + (float)(i - face.vertices[0].y) * du2_step;
+            float tex_ev = face.texCoords[0].v + (float)(i - face.vertices[0].y) * dv2_step;
+            float tex_ew = face.texCoords[0].w + (float)(i - face.vertices[0].y) * dw2_step;
+
+            if (ax > bx){
+                std::swap(ax, bx);
+                std::swap(tex_su, tex_eu);
+                std::swap(tex_sv, tex_ev);
+                std::swap(tex_sw, tex_ew);
+            }
+
+            tex_u = tex_su;
+            tex_v = tex_sv;
+            tex_w = tex_sw;
+
+            float texStep = 1.0f / ((float)(bx - ax));
+            float t = 0.0f;
+
+            for (int j = ax; j <= bx; j++)
+            {
+                tex_u = (1.0f - t) * tex_su + t * tex_eu;
+                tex_v = (1.0f - t) * tex_sv + t * tex_ev;
+                tex_w = (1.0f - t) * tex_sw + t * tex_ew;
+                tex_u = std::min(tex_u, 1.0f);
+                tex_v = std::min(tex_v, 1.0f);
+                tex_w = std::min(tex_w, 1.0f);
+                tex_u = std::max(tex_u, 0.0f);
+                tex_v = std::max(tex_v, 0.0f);
+                tex_w = std::max(tex_w, 0.0f);
+                if(true) //insertion point for zBuffer pixel culling
+                {
+                    Color color;
+                    color.r = texture.pixels(tex_u* texture.width, tex_v * texture.height, 0, 0);
+                    color.g = texture.pixels(tex_u* texture.width, tex_v * texture.height, 0, 1);
+                    color.b = texture.pixels(tex_u* texture.width, tex_v * texture.height, 0, 2);
+                    color.a = 255;
+                    DrawPixel(j, i, color);
+                    }
+                t += texStep;
+            }
+        }
+    }
+
+    dy1 = face.vertices[2].y - face.vertices[1].y;
+    dx1 = face.vertices[2].x - face.vertices[1].x;
+    dv1 = face.texCoords[2].v - face.texCoords[1].v;
+    du1 = face.texCoords[2].u - face.texCoords[1].u;
+    dw1 = face.texCoords[2].w - face.texCoords[1].w;
+
+    if (dy1) dax_step = dx1 / (float)abs(dy1);
+    if (dy2) dbx_step = dx2 / (float)abs(dy2);
+    du1_step = 0, dv1_step = 0;
+    if (dy1) du1_step = du1 / (float)abs(dy1);
+    if (dy1) dv1_step = dv1 / (float)abs(dy1);
+    if (dy1) dw1_step = dw1 / (float)abs(dy1);
+
+    if (dy1)
+    {
+        for (int i = midY; i < maxY; i++)
+        {
+            int ax = face.vertices[1].x + (i - face.vertices[1].y) * dax_step;
+            int bx = face.vertices[0].x + (i - face.vertices[0].y) * dbx_step;
+            if (i == midY) ax = face.vertices[1].x;
+
+            float tex_su = face.texCoords[1].u + (float)(i - face.vertices[1].y) * du1_step;
+            float tex_sv = face.texCoords[1].v + (float)(i - face.vertices[1].y) * dv1_step;
+            float tex_sw = face.texCoords[1].w + (float)(i - face.vertices[1].y) * dw1_step;
+
+            float tex_eu = face.texCoords[0].u + (float)(i - face.vertices[0].y) * du2_step;
+            float tex_ev = face.texCoords[0].v + (float)(i - face.vertices[0].y) * dv2_step;
+            float tex_ew = face.texCoords[0].w + (float)(i - face.vertices[0].y) * dw2_step;
+
+            if (ax > bx) {
+                std::swap(ax, bx);
+                std::swap(tex_su, tex_eu);
+                std::swap(tex_sv, tex_ev);
+                std::swap(tex_sw, tex_ew);
+            }
+            tex_u = tex_su;
+            tex_v = tex_sv;
+            tex_w = tex_sw;
+
+            float tstep = 1.0f / ((float)(bx - ax));
+            float t = 0.0f;
+
+            for (int j = ax; j <= bx; j++)
+            {
+            tex_u = (1.0f - t) * tex_su + t * tex_eu;
+            tex_v = (1.0f - t) * tex_sv + t * tex_ev;
+            tex_w = (1.0f - t) * tex_sw + t * tex_ew;
+            tex_u = std::min(tex_u, 1.0f);
+            tex_v = std::min(tex_v, 1.0f);
+            tex_w = std::min(tex_w, 1.0f);
+            tex_u = std::max(tex_u, 0.0f);
+            tex_v = std::max(tex_v, 0.0f);
+            tex_w = std::max(tex_w, 0.0f);
+
+            if (true) //insertion point for zBuffer pixel culling
+            {
+                Color color;
+                color.r = texture.pixels(tex_u* texture.width, tex_v * texture.height, 0, 0);
+                color.g = texture.pixels(tex_u* texture.width, tex_v * texture.height, 0, 1);
+                color.b = texture.pixels(tex_u* texture.width, tex_v * texture.height, 0, 2);
+                color.a = 255;
+                DrawPixel(j, i, color);
+            }
+                t += tstep;
+            }
+        }
     }
 }

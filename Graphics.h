@@ -19,7 +19,7 @@ public:
     static void DrawLine(Vec3 p1, Vec3 p2, Color& color);
     static void drawFaceLines(TransformedFace face, Color color);
     static void drawFaceFilled(TransformedFace& face, Color color);
-//    static void DrawTriangleTex( const Vec2& v0,const Vec2& v1,const Vec2& v2, Scratch3d::Texture tex );
+    static void drawFaceTextured(TransformedFace &face, Scratch3d::Texture &texture);
 };
 
 

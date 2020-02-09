@@ -7,12 +7,15 @@
 
 #include <string>
 #include <vector>
+#define Font x11FONT
+#include "CImg.h"
+#undef Font
 
 namespace Scratch3d{
     struct Texture {
-        std::vector<Color> pixelData;
-        int width;
-        int height;
+        cimg_library::CImg<unsigned char> pixels;
+        unsigned width;
+        unsigned height;
         explicit Texture(const char* fName);
     };
 }
