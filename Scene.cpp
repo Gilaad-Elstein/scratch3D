@@ -27,7 +27,7 @@ void Scene::PlayFrame() {
 
         mesh.resetTransformations();
         Update();
-//        mesh.cullBackFaces();
+        mesh.cullBackFaces();
         mesh.transform(width, height);
     }
 
