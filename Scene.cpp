@@ -6,15 +6,29 @@
 #include "Graphics.h"
 #include <raylib.h>
 
+void Scene::SetWidthHeight(){
+    if(width != GetScreenWidth() || height != GetScreenHeight()){
+        width = GetScreenWidth();
+        height = GetScreenHeight();
+        delete zBuffer;
+        zBuffer = new float[width * height];
+        for (int i = 0; i < width * height; ++i) {
+            zBuffer[i] = -std::numeric_limits<float>::infinity();
+        }
+    }
+}
+
 void Scene::PlayFrame() {
+    SetWidthHeight();
 
     ClearBackground(BLACK);
     BeginDrawing();
     for(auto& mesh : meshList_){
+
         mesh.resetTransformations();
         Update();
         mesh.cullBackFaces();
-        mesh.transform(GetScreenWidth(), GetScreenHeight());
+        mesh.transform(width, height);
     }
 
     for(auto& mesh : meshList_) {
@@ -33,4 +47,3 @@ void Scene::PlayFrame() {
     EndDrawing();
 
 }
-

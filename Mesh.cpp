@@ -145,6 +145,7 @@ namespace Scratch3d {
     void Mesh::transform(int w, int h) {
         for (auto &vertex : manipulatedVertices) {
             float inverseZ = 1.0f / vertex.z;
+            vertex.y *= w/(float)h; //for aspect ratio
             vertex.x = (vertex.x * inverseZ + 1) * static_cast<float>(w) / 2;
             vertex.y = (vertex.y * inverseZ + 1) * static_cast<float>(h) / 2;
         }

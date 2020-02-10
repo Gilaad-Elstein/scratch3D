@@ -11,10 +11,17 @@
 class Scene {
 protected:
     std::vector<Scratch3d::Mesh> meshList_;
+    float* zBuffer = NULL;
+    int width = 0, height = 0;
+
+    void SetWidthHeight();
+
+
 public:
     bool drawMesh = false;
     void PlayFrame();
     virtual void Update() = 0;
+
 };
 
 
