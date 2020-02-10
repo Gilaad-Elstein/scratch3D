@@ -212,7 +212,8 @@ void Graphics::drawFaceTextured(TransformedFace &face, Scratch3d::Texture &textu
 
                 float z = az;
                 if (bx - ax) z += (bz - az) * (j - ax) / float(bx - ax);
-                if(z < zBuffer[j + i * GetScreenWidth()])
+                int zBufferIndex = j + i * GetScreenWidth();
+                if(zBufferIndex < GetScreenWidth() * GetScreenHeight() && z < zBuffer[zBufferIndex])
                 {
                     zBuffer[j + i*GetScreenWidth()] = z;
                     Color color;
@@ -287,7 +288,8 @@ void Graphics::drawFaceTextured(TransformedFace &face, Scratch3d::Texture &textu
 
             float z = az;
             if (bx - ax) z += (bz - az) * (j - ax) / float(bx - ax);
-            if(z < zBuffer[j + i * GetScreenWidth()])
+            int zBufferIndex = j + i * GetScreenWidth();
+            if(zBufferIndex < GetScreenWidth() * GetScreenHeight() && z < zBuffer[zBufferIndex])
             {
                 zBuffer[j + i*GetScreenWidth()] = z;
                 Color color;
