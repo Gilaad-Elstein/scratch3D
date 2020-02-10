@@ -30,7 +30,7 @@ add_executable(scratch3D
                structs/Logger.cpp
                structs/Logger.h
                Scene.cpp
-               Scene.h Scenes/TestCubeScene.cpp Scenes/TestCubeScene.h)
+               Scene.h Scenes/TestCubeScene.cpp Scenes/TestCubeScene.h Scenes/AfricanHeadScene.cpp Scenes/AfricanHeadScene.h Scenes/RotatingObjectScene.cpp Scenes/RotatingObjectScene.h Scenes/JeepScene.cpp Scenes/JeepScene.h)
 
 #set(raylib_VERBOSE 1)
 target_link_libraries(scratch3D raylib  X11)

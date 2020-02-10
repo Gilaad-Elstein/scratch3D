@@ -5,6 +5,8 @@
 #include "AppWindow.h"
 #include "Scene.h"
 #include "Scenes/TestCubeScene.h"
+#include "Scenes/AfricanHeadScene.h"
+#include "Scenes/JeepScene.h"
 #include <raylib.h>
 
 const int WINDOWED_RESOLUTION_WIDTH = 640;
@@ -34,11 +36,16 @@ void AppWindow::run(){
     InitWindow(WINDOWED_RESOLUTION_WIDTH, WINDOWED_RESOLUTION_HEIGHT, "scratch3D");
     fullscreen = true;
 
-    TestCubeScene scene{};
+    std::vector<Scene*> scenes;
+    scenes.emplace_back(new TestCubeScene{});
+    scenes.emplace_back(new AfricanHeadScene{});
+    scenes.emplace_back(new JeepScene{});
+    int sceneIndex = 0;
 
     while (!WindowShouldClose()){
-        if(IsKeyPressed(KEY_M)) scene.drawMesh = !scene.drawMesh;
-        scene.PlayFrame();
+        if(IsKeyPressed(KEY_M)) scenes[sceneIndex]->drawMesh = !scenes[sceneIndex]->drawMesh;
+        if(IsKeyPressed(KEY_TAB)) sceneIndex = (sceneIndex+1)%(int)scenes.size();
+        scenes[sceneIndex]->PlayFrame();
     }
     CloseWindow();
 }
