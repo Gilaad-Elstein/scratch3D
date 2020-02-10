@@ -4,7 +4,6 @@
 
 #include <cmath>
 #include "Graphics.h"
-#include "Logger.h"
 
 
 void Graphics::TintColor(Color &c, float dp) {

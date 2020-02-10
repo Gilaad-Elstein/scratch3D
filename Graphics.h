@@ -7,9 +7,9 @@
 
 
 #include <raylib.h>
-#include "Vec3.h"
+#include "structs/Vec3.h"
 #include "Mesh.h"
-#include "Texture.h"
+#include "structs/Texture.h"
 
 using Scratch3d::TransformedFace;
 

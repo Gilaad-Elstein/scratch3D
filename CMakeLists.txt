@@ -11,25 +11,26 @@ file(COPY Resources DESTINATION  ${CMAKE_CURRENT_BINARY_DIR})
 
 
 add_executable(scratch3D
-               CImg.h
+               Dependencies/CImg.h
                main.cpp
-               Engine.cpp
-               Engine.h
-               Vec3.cpp
-               Vec3.h
+               AppWindow.cpp
+               AppWindow.h
+               structs/Vec3.cpp
+               structs/Vec3.h
                Mesh.cpp
                Mesh.h
-               Matrix4x4.cpp
-               Matrix4x4.h
+               structs/Matrix4x4.cpp
+               structs/Matrix4x4.h
                Graphics.cpp
                Graphics.h
-               Vec2.cpp
-               Vec2.h
-               Texture.cpp
-               Texture.h
-               Logger.cpp
-               Logger.h
-               )
+               structs/Vec2.cpp
+               structs/Vec2.h
+               structs/Texture.cpp
+               structs/Texture.h
+               structs/Logger.cpp
+               structs/Logger.h
+               Scene.cpp
+               Scene.h Scenes/TestCubeScene.cpp Scenes/TestCubeScene.h)
 
 #set(raylib_VERBOSE 1)
 target_link_libraries(scratch3D raylib  X11)

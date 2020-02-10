@@ -8,8 +8,9 @@
 
 #include <vector>
 #include <sstream>
-#include "Vec3.h"
-#include "Vec2.h"
+#include "structs/Vec3.h"
+#include "structs/Vec2.h"
+#include "structs/Texture.h"
 
 namespace Scratch3d{
     struct Face{
@@ -37,6 +38,7 @@ namespace Scratch3d{
         void rotate(float x, float y, float z);
         void rotateRaw(float x, float y, float z);
         void transform(int w, int h);
+        void transformNoPerspective(int w, int h);
         void cullBackFaces();
         std::vector<TransformedFace> getTransformedFaces();
         void invertRawXY();
@@ -44,7 +46,7 @@ namespace Scratch3d{
         static Mesh GetTestCube(float size);
         static Mesh GetMeshFromObjectFile(const std::string &sFilename);
 
-        void transformNoPerspective(int w, int h);
+        Texture texture;
     };
 
 }
