@@ -118,12 +118,7 @@ void Graphics::drawFaceFilled(TransformedFace& face, Color color) {
     }
 }
 
-void Graphics::drawFaceTextured(TransformedFace &face, Scratch3d::Texture &texture) {
-
-    face.texCoords[0].w = face.vertices[0].w;
-    face.texCoords[1].w = face.vertices[1].w;
-    face.texCoords[2].w = face.vertices[2].w;
-
+void Graphics::drawFaceTextured(TransformedFace &face, Scratch3d::Texture &texture, float *zBuffer) {
     if (face.vertices[1].y < face.vertices[0].y) {
         std::swap(face.vertices[1], face.vertices[0]);
         std::swap(face.texCoords[1], face.texCoords[0]);
@@ -136,8 +131,6 @@ void Graphics::drawFaceTextured(TransformedFace &face, Scratch3d::Texture &textu
         std::swap(face.vertices[2], face.vertices[1]);
         std::swap(face.texCoords[2], face.texCoords[1]);
     }
-
-
 
     int minY = face.vertices[0].y;
     int midY = face.vertices[1].y;
@@ -174,12 +167,17 @@ void Graphics::drawFaceTextured(TransformedFace &face, Scratch3d::Texture &textu
     if (dy2) dv2_step = dv2 / (float)abs(dy2);
     if (dy2) dw2_step = dw2 / (float)abs(dy2);
 
+    float dz1 = face.vertices[1].z - face.vertices[0].z;
+    float dz2 = face.vertices[2].z - face.vertices[0].z;
+
     if (dy1)
     {
         for (int i =  minY; i <= midY; i++)
         {
             int ax = face.vertices[0].x + (int)(i - face.vertices[0].y) * dax_step;
             int bx = face.vertices[0].x + (int)(i - face.vertices[0].y) * dbx_step;
+            float az = face.vertices[0].z + dz1 * (i - minY)/(float)abs((dy1));
+            float bz = face.vertices[0].z + dz2 * (i - minY)/(float)abs((dy1));
 
             float tex_su = face.texCoords[0].u + (float)(i - face.vertices[0].y) * du1_step;
             float tex_sv = face.texCoords[0].v + (float)(i - face.vertices[0].y) * dv1_step;
@@ -191,14 +189,11 @@ void Graphics::drawFaceTextured(TransformedFace &face, Scratch3d::Texture &textu
 
             if (ax > bx){
                 std::swap(ax, bx);
+                std::swap(az, bz);
                 std::swap(tex_su, tex_eu);
                 std::swap(tex_sv, tex_ev);
                 std::swap(tex_sw, tex_ew);
             }
-
-            tex_u = tex_su;
-            tex_v = tex_sv;
-            tex_w = tex_sw;
 
             float texStep = 1.0f / ((float)(bx - ax));
             float t = 0.0f;
@@ -214,15 +209,19 @@ void Graphics::drawFaceTextured(TransformedFace &face, Scratch3d::Texture &textu
                 tex_u = std::max(tex_u, 0.0f);
                 tex_v = std::max(tex_v, 0.0f);
                 tex_w = std::max(tex_w, 0.0f);
-                if(true) //insertion point for zBuffer pixel culling
+
+                float z = az;
+                if (bx - ax) z += (bz - az) * (j - ax) / float(bx - ax);
+                if(z < zBuffer[j + i * GetScreenWidth()])
                 {
+                    zBuffer[j + i*GetScreenWidth()] = z;
                     Color color;
                     color.r = texture.pixels(tex_u* texture.width, tex_v * texture.height, 0, 0);
                     color.g = texture.pixels(tex_u* texture.width, tex_v * texture.height, 0, 1);
                     color.b = texture.pixels(tex_u* texture.width, tex_v * texture.height, 0, 2);
                     color.a = 255;
                     DrawPixel(j, i, color);
-                    }
+                }
                 t += texStep;
             }
         }
@@ -236,10 +235,12 @@ void Graphics::drawFaceTextured(TransformedFace &face, Scratch3d::Texture &textu
 
     if (dy1) dax_step = dx1 / (float)abs(dy1);
     if (dy2) dbx_step = dx2 / (float)abs(dy2);
-    du1_step = 0, dv1_step = 0;
+
     if (dy1) du1_step = du1 / (float)abs(dy1);
     if (dy1) dv1_step = dv1 / (float)abs(dy1);
     if (dy1) dw1_step = dw1 / (float)abs(dy1);
+
+    dz1 = face.vertices[2].z - face.vertices[1].z;
 
     if (dy1)
     {
@@ -247,7 +248,8 @@ void Graphics::drawFaceTextured(TransformedFace &face, Scratch3d::Texture &textu
         {
             int ax = face.vertices[1].x + (int)(i - face.vertices[1].y) * dax_step;
             int bx = face.vertices[0].x + (int)(i - face.vertices[0].y) * dbx_step;
-
+            float az = face.vertices[1].z + dz1 * (i - midY)/(float)abs((dy1));
+            float bz = face.vertices[0].z + dz2 * (i - midY)/(float)abs((dy1));
 
             float tex_su = face.texCoords[1].u + (float)(i - face.vertices[1].y) * du1_step;
             float tex_sv = face.texCoords[1].v + (float)(i - face.vertices[1].y) * dv1_step;
@@ -259,6 +261,7 @@ void Graphics::drawFaceTextured(TransformedFace &face, Scratch3d::Texture &textu
 
             if (ax > bx) {
                 std::swap(ax, bx);
+                std::swap(az, bz);
                 std::swap(tex_su, tex_eu);
                 std::swap(tex_sv, tex_ev);
                 std::swap(tex_sw, tex_ew);
@@ -282,8 +285,11 @@ void Graphics::drawFaceTextured(TransformedFace &face, Scratch3d::Texture &textu
             tex_v = std::max(tex_v, 0.0f);
             tex_w = std::max(tex_w, 0.0f);
 
-            if (true) //insertion point for zBuffer pixel culling
+            float z = az;
+            if (bx - ax) z += (bz - az) * (j - ax) / float(bx - ax);
+            if(z < zBuffer[j + i * GetScreenWidth()])
             {
+                zBuffer[j + i*GetScreenWidth()] = z;
                 Color color;
                 color.r = texture.pixels(tex_u* texture.width, tex_v * texture.height, 0, 0);
                 color.g = texture.pixels(tex_u* texture.width, tex_v * texture.height, 0, 1);

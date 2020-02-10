@@ -19,7 +19,7 @@ public:
     static void DrawLine(Vec3 p1, Vec3 p2, Color& color);
     static void drawFaceLines(TransformedFace face, Color color);
     static void drawFaceFilled(TransformedFace& face, Color color);
-    static void drawFaceTextured(TransformedFace &face, Scratch3d::Texture &texture);
+    static void drawFaceTextured(TransformedFace &face, Scratch3d::Texture &texture, float *zBuffer);
 };
 
 

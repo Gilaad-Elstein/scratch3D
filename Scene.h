@@ -14,7 +14,8 @@ protected:
     float* zBuffer = NULL;
     int width = 0, height = 0;
 
-    void SetWidthHeight();
+    void ResetZBuffer();
+    ~Scene();
 
 
 public:

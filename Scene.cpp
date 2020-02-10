@@ -6,20 +6,20 @@
 #include "Graphics.h"
 #include <raylib.h>
 
-void Scene::SetWidthHeight(){
+void Scene::ResetZBuffer(){
     if(width != GetScreenWidth() || height != GetScreenHeight()){
         width = GetScreenWidth();
         height = GetScreenHeight();
-        delete zBuffer;
-        zBuffer = new float[width * height];
-        for (int i = 0; i < width * height; ++i) {
-            zBuffer[i] = -std::numeric_limits<float>::infinity();
-        }
+    }
+    delete zBuffer;
+    zBuffer = new float[width * height];
+    for (int i = 0; i < width * height; ++i) {
+        zBuffer[i] = std::numeric_limits<float>::infinity();
     }
 }
 
 void Scene::PlayFrame() {
-    SetWidthHeight();
+    ResetZBuffer();
 
     ClearBackground(BLACK);
     BeginDrawing();
@@ -27,7 +27,7 @@ void Scene::PlayFrame() {
 
         mesh.resetTransformations();
         Update();
-        mesh.cullBackFaces();
+//        mesh.cullBackFaces();
         mesh.transform(width, height);
     }
 
@@ -35,7 +35,7 @@ void Scene::PlayFrame() {
         std::vector<Scratch3d::TransformedFace> faces =  mesh.getTransformedFaces();
         for(auto & face : faces){
             if (face.texCoords.empty()) Graphics::drawFaceFilled(face, GRAY);
-            else Graphics::drawFaceTextured(face, mesh.texture);
+            else Graphics::drawFaceTextured(face, mesh.texture, zBuffer);
         }
         if (drawMesh){
             for(auto const& face : faces){
@@ -46,4 +46,8 @@ void Scene::PlayFrame() {
 
     EndDrawing();
 
+}
+
+Scene::~Scene() {
+    delete zBuffer;
 }

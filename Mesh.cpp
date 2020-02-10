@@ -145,9 +145,8 @@ namespace Scratch3d {
     void Mesh::transform(int w, int h) {
         for (auto &vertex : manipulatedVertices) {
             float inverseZ = 1.0f / vertex.z;
-            vertex.y *= w/(float)h; //for aspect ratio
             vertex.x = (vertex.x * inverseZ + 1) * static_cast<float>(w) / 2;
-            vertex.y = (vertex.y * inverseZ + 1) * static_cast<float>(h) / 2;
+            vertex.y = (vertex.y * w/(float)h * inverseZ + 1) * static_cast<float>(h) / 2;
         }
     }
 
@@ -182,7 +181,7 @@ namespace Scratch3d {
         for (auto &faceIndexList : facesIndexLists) {
             i++;
             TransformedFace face;
-            if (!visibleFaces[i]) continue;
+            if (!visibleFaces.empty() && !visibleFaces[i]) continue;
             for (const auto &vertexIndex : facesIndexLists[i].iVertices) {
                 face.vertices.emplace_back(manipulatedVertices[vertexIndex]);
             }
