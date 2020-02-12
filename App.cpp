@@ -23,12 +23,12 @@ void InitAppWindow(bool requestedFullscreen){
     activeWindow = false;
     SetTargetFPS(30);
     if (requestedFullscreen){
-        SetConfigFlags(FLAG_VSYNC_HINT | FLAG_WINDOW_UNDECORATED);
+        SetConfigFlags(FLAG_WINDOW_UNDECORATED);
         InitWindow(FULLSCREEN_RESOLUTION_WIDTH, FULLSCREEN_RESOLUTION_HEIGHT, "scratch3D");
         fullscreen = true;
     }
     else{
-        SetConfigFlags(FLAG_VSYNC_HINT | FLAG_WINDOW_RESIZABLE);
+        SetConfigFlags(FLAG_WINDOW_RESIZABLE);
         InitWindow(WINDOWED_RESOLUTION_WIDTH, WINDOWED_RESOLUTION_HEIGHT, "scratch3D");
         fullscreen = false;
     }
