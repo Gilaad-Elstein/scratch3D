@@ -5,6 +5,7 @@
 #include "Scene.h"
 #include "Graphics.h"
 #include <raylib.h>
+#include <limits>
 
 void Scene::ResetZBuffer(){
     if(width != GetScreenWidth() || height != GetScreenHeight()){

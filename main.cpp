@@ -1,6 +1,6 @@
-#include "AppWindow.h"
+#include "App.h"
 
 int main() {
-    AppWindow::run();
+    App::run();
     return 0;
 }

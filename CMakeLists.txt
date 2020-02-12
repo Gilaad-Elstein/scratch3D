@@ -10,27 +10,7 @@ find_package(raylib 2.5) # Let CMake search for a raylib-config.cmake
 file(COPY Resources DESTINATION  ${CMAKE_CURRENT_BINARY_DIR})
 
 
-add_executable(scratch3D
-               Dependencies/CImg.h
-               main.cpp
-               AppWindow.cpp
-               AppWindow.h
-               structs/Vec3.cpp
-               structs/Vec3.h
-               Mesh.cpp
-               Mesh.h
-               structs/Matrix4x4.cpp
-               structs/Matrix4x4.h
-               Graphics.cpp
-               Graphics.h
-               structs/Vec2.cpp
-               structs/Vec2.h
-               structs/Texture.cpp
-               structs/Texture.h
-               structs/Logger.cpp
-               structs/Logger.h
-               Scene.cpp
-               Scene.h Scenes/TestCubeScene.cpp Scenes/TestCubeScene.h Scenes/AfricanHeadScene.cpp Scenes/AfricanHeadScene.h Scenes/RotatingObjectScene.cpp Scenes/RotatingObjectScene.h Scenes/JeepScene.cpp Scenes/JeepScene.h)
+add_executable(scratch3D main.cpp App.cpp App.h structs/Vec3.cpp structs/Vec3.h Mesh.cpp Mesh.h structs/Matrix4x4.cpp structs/Matrix4x4.h Graphics.cpp Graphics.h  structs/Vec2.cpp structs/Vec2.h  structs/Texture.cpp structs/Texture.h structs/Logger.cpp  structs/Logger.h  Scene.cpp Scene.h Scenes/TestCubeScene.cpp Scenes/TestCubeScene.h Scenes/AfricanHeadScene.cpp Scenes/AfricanHeadScene.h Scenes/RotatingObjectScene.cpp Scenes/RotatingObjectScene.h Scenes/JeepScene.cpp Scenes/JeepScene.h Scenes/MeiPosedScene.cpp Scenes/MeiPosedScene.h)
 
 #set(raylib_VERBOSE 1)
 target_link_libraries(scratch3D raylib  X11)

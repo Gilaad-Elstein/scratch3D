@@ -2,11 +2,12 @@
 // Created by gilaad on 1/24/20.
 //
 
-#include "AppWindow.h"
+#include "App.h"
 #include "Scene.h"
 #include "Scenes/TestCubeScene.h"
 #include "Scenes/AfricanHeadScene.h"
 #include "Scenes/JeepScene.h"
+#include "Scenes/MeiPosedScene.h"
 #include <raylib.h>
 
 const int WINDOWED_RESOLUTION_WIDTH = 640;
@@ -16,7 +17,7 @@ const int FULLSCREEN_RESOLUTION_HEIGHT = 900;
 
 bool fullscreen;
 
-void ToggleFullscreenWrapper(bool STARTUP = False) {
+void ToggleFullscreenWrapper(bool STARTUP = false) {
     if (!STARTUP) fullscreen = !fullscreen;
     CloseWindow();
     if (fullscreen){
@@ -29,7 +30,7 @@ void ToggleFullscreenWrapper(bool STARTUP = False) {
     }
 }
 
-void AppWindow::run(){
+void App::run(){
     SetTargetFPS(30);
     SetConfigFlags(FLAG_VSYNC_HINT | FLAG_WINDOW_UNDECORATED);
     InitWindow(WINDOWED_RESOLUTION_WIDTH, WINDOWED_RESOLUTION_HEIGHT, "scratch3D");

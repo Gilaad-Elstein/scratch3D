@@ -7,18 +7,18 @@
 
 #include <string>
 #include <vector>
-#define Font x11FONT
-#include "../Dependencies/CImg.h"
-#undef Font
+#include "raylib.h"
 
 namespace Scratch3d{
     struct Texture {
         Texture();
 
-        cimg_library::CImg<unsigned char> pixels;
+        std::vector<std::vector<Color>> data;
         unsigned width;
         unsigned height;
-        explicit Texture(const char* fName);
+        explicit Texture(const char *fName, int numRotateCCW, bool flipVertically, bool flipHorizontally);
+
+        Color Sample(float u, float v);
     };
 }
 

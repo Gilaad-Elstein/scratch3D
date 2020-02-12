@@ -20,6 +20,14 @@ namespace Scratch3d {
         }
     }
 
+    void offsetVertexList(float x, float y, float z, std::vector<Vec3> &vertices) {
+        for (auto &vertex : vertices) {
+            vertex.x += x;
+            vertex.y += y;
+            vertex.z += z;
+        }
+    }
+
 
     Mesh Mesh::GetMeshFromObjectFile(std::string const &sFilename) {
         Mesh m{};
@@ -28,16 +36,28 @@ namespace Scratch3d {
             throw std::runtime_error("Error: Failed to open " + sFilename);
         }
         float maxAbsVal = 0;
+        float minX = 0, maxX = 0,
+              minY = 0, maxY = 0,
+              minZ = 0, maxZ = 0;
 
     std::vector<Vec2> textureVerts;
         while (!f.eof()) {
             std::string line;
             std::getline(f, line);
             if (line[0] == 'v') {
-                if (line[1] == 'n') { continue; }
 
                 std::stringstream ss(line);
                 char skipChar = 0;
+                if (line[1] == 'n'){
+                    ss >> skipChar;
+                    float px = 0;
+                    ss >> px;
+                    float py = 0;
+                    ss >> py;
+                    float pz = 0;
+                    ss >> pz;
+                    m.rawNormals.emplace_back(Vec3{px, py, pz});
+                }
 
                 if (line[1] == 't') {
                 ss >> skipChar >> skipChar >> skipChar;
@@ -51,12 +71,18 @@ namespace Scratch3d {
                     float px = 0;
                     ss >> px;
                     if (px > maxAbsVal) { maxAbsVal = px; }
+                    if (px > maxX) { maxX = px; }
+                    if (px < minX) { minX = px; }
                     float py = 0;
                     ss >> py;
                     if (py > maxAbsVal) { maxAbsVal = py; }
+                    if (py > maxY) { maxY = py; }
+                    if (py < minY) { minY = py; }
                     float pz = 0;
                     ss >> pz;
                     if (pz > maxAbsVal) { maxAbsVal = pz; }
+                    if (pz > maxZ) { maxZ = pz; }
+                    if (pz < minZ) { minZ = pz; }
                     m.rawVertices.emplace_back(Vec3{px, py, pz});
                 }
             }
@@ -69,6 +95,7 @@ namespace Scratch3d {
                 if (ss.str().find_first_of('/', 0) != std::string::npos) {
                     std::vector<size_t> indices;
                     std::vector<Vec2> texIndices;
+                    std::vector<size_t> normalIndices;
                     int valCount = 0;
                     while (ss >> val) {
                         valCount++;
@@ -82,25 +109,29 @@ namespace Scratch3d {
                                 ss >> skipChar;
                                 break;
                             case 2:
+                                normalIndices.emplace_back(val - 1); //obj indices are 1 based.
+                                break;
                             default:
                                 break;
                         }
                     }
-                    face = Face{indices[0], indices[1], indices[2], texIndices};
+                    face = Face{ indices, normalIndices, texIndices};
                 }
-//                else {
-//                    while (ss >> val) {
-//                        faceIndexList.iVertices.emplace_back(val - 1); //obj indices are 1 based.
-//                    }
-//                }
                 m.facesIndexLists.emplace_back(face);
             }
         }
+        m.translateRaw(-(minX + maxX) / 2.0f, -(minY + maxY) / 2.0f, -(minZ + maxZ) / 2.0f);
         if (maxAbsVal > 1) {
             for (auto &vertex : m.rawVertices) {
                 vertex.x /= maxAbsVal;
                 vertex.y /= maxAbsVal;
                 vertex.z /= maxAbsVal;
+            }
+            for (auto &vertex : m.rawNormals) {
+                vertex.x /= maxAbsVal;
+                vertex.y /= maxAbsVal;
+                vertex.z /= maxAbsVal;
+                vertex.Normalise();
             }
         }
         return m;
@@ -117,29 +148,34 @@ namespace Scratch3d {
         m.rawVertices.emplace_back(side, -side, side); // 5
         m.rawVertices.emplace_back(-side, side, side); // 6
         m.rawVertices.emplace_back(side, side, side); // 7
+        m.rawNormals.emplace_back(Vec3{-1.0f, -1.0f, -1.0f});  // 0
+        m.rawNormals.emplace_back(Vec3{1.0f, -1.0f, -1.0f}); // 1
+        m.rawNormals.emplace_back(Vec3{-1.0f, 1.0f, -1.0f}); // 2
+        m.rawNormals.emplace_back(Vec3{1.0f, 1.0f, -1.0f}); // 3
+        m.rawNormals.emplace_back(Vec3{-1.0f, -1.0f, 1.0f}); // 4
+        m.rawNormals.emplace_back(Vec3{1.0f, -1.0f, 1.0f}); // 5
+        m.rawNormals.emplace_back(Vec3{-1.0f, 1.0f, 1.0f}); // 6
+        m.rawNormals.emplace_back(Vec3{1.0f, 1.0f, 1.0f});  //7
 
-        m.facesIndexLists.emplace_back(Face{0, 2, 1, std::vector<Vec2>{Vec2{0, 0}, Vec2{0, 1}, Vec2{1, 0}}});
-        m.facesIndexLists.emplace_back(Face{2, 3, 1, std::vector<Vec2>{Vec2{0, 1}, Vec2{1, 1}, Vec2{1, 0}}});
-        m.facesIndexLists.emplace_back(Face{1, 3, 5, std::vector<Vec2>{Vec2{0, 0}, Vec2{0, 1}, Vec2{1, 0}}});
-        m.facesIndexLists.emplace_back(Face{3, 7, 5, std::vector<Vec2>{Vec2{0, 1}, Vec2{1, 1}, Vec2{1, 0}}});
-        m.facesIndexLists.emplace_back(Face{2, 6, 3, std::vector<Vec2>{Vec2{0, 0}, Vec2{0, 1}, Vec2{1, 0}}});
-        m.facesIndexLists.emplace_back(Face{3, 6, 7, std::vector<Vec2>{Vec2{1, 0}, Vec2{0, 1}, Vec2{1, 1}}});
-        m.facesIndexLists.emplace_back(Face{4, 5, 7, std::vector<Vec2>{Vec2{0, 1}, Vec2{0, 0}, Vec2{1, 0}}});
-        m.facesIndexLists.emplace_back(Face{4, 7, 6, std::vector<Vec2>{Vec2{0, 1}, Vec2{1, 0}, Vec2{1, 1}}});
-        m.facesIndexLists.emplace_back(Face{0, 4, 2, std::vector<Vec2>{Vec2{0, 0}, Vec2{0, 1}, Vec2{1, 0}}});
-        m.facesIndexLists.emplace_back(Face{2, 4, 6, std::vector<Vec2>{Vec2{1, 0}, Vec2{0, 1}, Vec2{1, 1}}});
-        m.facesIndexLists.emplace_back(Face{0, 1, 4, std::vector<Vec2>{Vec2{0, 0}, Vec2{0, 1}, Vec2{1, 0}}});
-        m.facesIndexLists.emplace_back(Face{1, 5, 4, std::vector<Vec2>{Vec2{0, 1}, Vec2{1, 1}, Vec2{1, 0}}});
+        m.facesIndexLists.emplace_back(Face{std::vector<size_t>{0, 2, 1}, std::vector<size_t>{0, 2, 1}, std::vector<Vec2>{Vec2{0, 0}, Vec2{0, 1}, Vec2{1, 0}}});
+        m.facesIndexLists.emplace_back(Face{std::vector<size_t>{2, 3, 1}, std::vector<size_t>{2, 3, 1}, std::vector<Vec2>{Vec2{0, 1}, Vec2{1, 1}, Vec2{1, 0}}});
+        m.facesIndexLists.emplace_back(Face{std::vector<size_t>{1, 3, 5}, std::vector<size_t>{1, 3, 5}, std::vector<Vec2>{Vec2{0, 0}, Vec2{0, 1}, Vec2{1, 0}}});
+        m.facesIndexLists.emplace_back(Face{std::vector<size_t>{3, 7, 5}, std::vector<size_t>{3, 7, 5}, std::vector<Vec2>{Vec2{0, 1}, Vec2{1, 1}, Vec2{1, 0}}});
+        m.facesIndexLists.emplace_back(Face{std::vector<size_t>{2, 6, 3}, std::vector<size_t>{2, 6, 3}, std::vector<Vec2>{Vec2{0, 0}, Vec2{0, 1}, Vec2{1, 0}}});
+        m.facesIndexLists.emplace_back(Face{std::vector<size_t>{3, 6, 7}, std::vector<size_t>{3, 6, 7}, std::vector<Vec2>{Vec2{1, 0}, Vec2{0, 1}, Vec2{1, 1}}});
+        m.facesIndexLists.emplace_back(Face{std::vector<size_t>{4, 5, 7}, std::vector<size_t>{4, 5, 7}, std::vector<Vec2>{Vec2{0, 1}, Vec2{0, 0}, Vec2{1, 0}}});
+        m.facesIndexLists.emplace_back(Face{std::vector<size_t>{4, 7, 6}, std::vector<size_t>{4, 7, 6}, std::vector<Vec2>{Vec2{0, 1}, Vec2{1, 0}, Vec2{1, 1}}});
+        m.facesIndexLists.emplace_back(Face{std::vector<size_t>{0, 4, 2}, std::vector<size_t>{0, 4, 2}, std::vector<Vec2>{Vec2{0, 0}, Vec2{0, 1}, Vec2{1, 0}}});
+        m.facesIndexLists.emplace_back(Face{std::vector<size_t>{2, 4, 6}, std::vector<size_t>{2, 4, 6}, std::vector<Vec2>{Vec2{1, 0}, Vec2{0, 1}, Vec2{1, 1}}});
+        m.facesIndexLists.emplace_back(Face{std::vector<size_t>{0, 1, 4}, std::vector<size_t>{0, 1, 4}, std::vector<Vec2>{Vec2{0, 0}, Vec2{0, 1}, Vec2{1, 0}}});
+        m.facesIndexLists.emplace_back(Face{std::vector<size_t>{1, 5, 4}, std::vector<size_t>{1, 5, 4}, std::vector<Vec2>{Vec2{0, 1}, Vec2{1, 1}, Vec2{1, 0}}});
 
         return m;
     }
 
     void Mesh::translate(float x, float y, float z) {
-        for (auto &vertex : manipulatedVertices) {
-            vertex.x += x;
-            vertex.y += y;
-            vertex.z += z;
-        }
+        offsetVertexList(x, y, z, manipulatedVertices);
+        offsetVertexList(x, y, z, manipulatedNormals);
     }
 
     void Mesh::transform(int w, int h) {
@@ -147,13 +183,6 @@ namespace Scratch3d {
             float inverseZ = 1.0f / vertex.z;
             vertex.x = (vertex.x * inverseZ + 1) * static_cast<float>(w) / 2;
             vertex.y = (vertex.y * w/(float)h * inverseZ + 1) * static_cast<float>(h) / 2;
-        }
-    }
-
-    void Mesh::transformNoPerspective(int w, int h) {
-        for (auto &vertex : manipulatedVertices) {
-            vertex.x = (vertex.x + 1) * static_cast<float>(w) / 2;
-            vertex.y = (vertex.y + 1) * static_cast<float>(h) / 2;
         }
     }
 
@@ -167,11 +196,20 @@ namespace Scratch3d {
         texCoords = std::move(texCoords_);
     }
 
+    Face::Face(std::vector<size_t> indices, std::vector<size_t> normalIndices, std::vector<Vec2> texCoords)
+        : Face(indices[0], indices[1], indices[2], texCoords) {
+        iNormals = std::move(normalIndices);
+    }
+
     void Mesh::resetTransformations() {
         manipulatedVertices.clear();
         visibleFaces.clear();
+        manipulatedNormals.clear();
         for (const auto &vertex : rawVertices) {
             manipulatedVertices.emplace_back(vertex);
+        }
+        for (const auto &vertex : rawNormals) {
+            manipulatedNormals.emplace_back(vertex);
         }
     }
 
@@ -187,6 +225,9 @@ namespace Scratch3d {
             }
             for (const auto &texCoord : facesIndexLists[i].texCoords) {
                 face.texCoords.emplace_back(texCoord);
+            }
+            for (const auto &iNormal : facesIndexLists[i].iNormals) {
+                face.normals.emplace_back(manipulatedNormals[iNormal]);
             }
             faces.emplace_back(face);
         }
@@ -207,14 +248,25 @@ namespace Scratch3d {
 
     void Mesh::rotateRaw(float x, float y, float z) {
         rotateVertexList(x, y, z, rawVertices);
+        rotateVertexList(x, y, z, rawNormals);
+    }
+
+    void Mesh::translateRaw(float x, float y, float z) {
+        offsetVertexList(x, y, z, rawVertices);
+        offsetVertexList(x, y, z, rawNormals);
     }
 
     void Mesh::rotate(float x, float y, float z) {
         rotateVertexList(x, y, z, manipulatedVertices);
+        rotateVertexList(x, y, z, manipulatedNormals);
     }
 
     void Mesh::invertRawXY() {
         for(auto& vertex : rawVertices){
+            vertex.x *= -1;
+            vertex.y *= -1;
+        }
+        for(auto& vertex : rawNormals){
             vertex.x *= -1;
             vertex.y *= -1;
         }
