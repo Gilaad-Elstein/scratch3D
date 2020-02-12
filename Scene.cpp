@@ -44,9 +44,7 @@ void Scene::PlayFrame() {
             }
         }
     }
-
     EndDrawing();
-
 }
 
 Scene::~Scene() {

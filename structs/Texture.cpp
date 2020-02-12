@@ -6,13 +6,10 @@
 
 
 namespace Scratch3d{
-    Texture::Texture(const char *fName, int numRotateCCW = 0, bool flipVertically = false, bool flipHorizontally = false) {
+    Texture::Texture(const char *fName, bool flipVertically, bool flipHorizontally) {
 
         Image img = LoadImage(fName);
         Image* pImg = &img;
-        for (int k = 0; k < numRotateCCW; ++k) {
-            ImageRotateCCW(pImg);
-        }
         if (flipVertically) ImageFlipVertical(pImg);
         if (flipHorizontally) ImageFlipHorizontal(pImg);
         Color* rawPixels = GetImageData(*pImg);

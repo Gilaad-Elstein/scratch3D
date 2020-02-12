@@ -16,7 +16,7 @@ namespace Scratch3d{
         std::vector<std::vector<Color>> data;
         unsigned width;
         unsigned height;
-        explicit Texture(const char *fName, int numRotateCCW, bool flipVertically, bool flipHorizontally);
+        explicit Texture(const char *fName, bool flipVertically, bool flipHorizontally);
 
         Color Sample(float u, float v);
     };
