@@ -11,13 +11,12 @@
 
 namespace Scratch3d{
     struct Texture {
-        Texture();
-
+    private:
         std::vector<std::vector<Color>> data;
-        unsigned width;
-        unsigned height;
-        explicit Texture(const char *fName, bool flipVertically, bool flipHorizontally);
 
+    public:
+        Texture(const char *fName, bool flipVertically, bool flipHorizontally);
+        Texture();
         Color Sample(float u, float v);
     };
 }

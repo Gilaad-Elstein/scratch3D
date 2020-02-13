@@ -13,21 +13,23 @@ namespace Scratch3d{
         if (flipVertically) ImageFlipVertical(pImg);
         if (flipHorizontally) ImageFlipHorizontal(pImg);
         Color* rawPixels = GetImageData(*pImg);
-        width = pImg->width;
-        height = pImg->height;
 
-        for (int i = 0; i < height; ++i) {
+        for (int i = 0; i < pImg->height; ++i) {
             std::vector<Color> currLine;
-            for (int j = 0; j < width; ++j) {
-                currLine.emplace_back(rawPixels[j + i * width]);
+            for (int j = 0; j < pImg->width; ++j) {
+                currLine.emplace_back(rawPixels[j + i * pImg->width]);
             }
             data.emplace_back(currLine);
         }
         delete rawPixels;
+        UnloadImage(img);
     }
 
     Color Texture::Sample(float u, float v){
-        return data[v*(height - 1)][u*(width - 1)]; //data is sorted by lines
+        //data is sorted by lines
+        float width = data[0].size();
+        float height = data.size();
+        return data[v*(height - 1)][u * (width - 1)];
     }
 
     Texture::Texture() {
