@@ -174,6 +174,8 @@ void Graphics::drawFaceTextured(TransformedFace &face, Scratch3d::Texture &textu
 
     float dz1 = face.vertices[1].z - face.vertices[0].z;
     float dz2 = face.vertices[2].z - face.vertices[0].z;
+    float diz1 = 1.0f/face.vertices[1].z - 1.0/face.vertices[0].z;
+    float diz2 = 1.0f/face.vertices[2].z - 1.0/face.vertices[0].z;
 
     if (dy1)
     {
@@ -183,6 +185,8 @@ void Graphics::drawFaceTextured(TransformedFace &face, Scratch3d::Texture &textu
             int bx = face.vertices[0].x + (int)(i - face.vertices[0].y) * dbx_step;
             float az = face.vertices[0].z + dz1 * (i - minY)/(float)abs((dy1));
             float bz = face.vertices[0].z + dz2 * (i - minY)/(float)abs((dy1));
+            float aiz = 1.0f/face.vertices[0].z + diz1 * (i - minY)/(float)abs((dy1));
+            float biz = 1.0f/face.vertices[0].z + diz2 * (i - minY)/(float)abs((dy1));
             float ad = Vec3{0, 0, -1}.DotProduct(face.normals[0]) + ddp1 * (i - minY)/(float)abs((dy1));
             float bd = Vec3{0, 0, -1}.DotProduct(face.normals[0]) + ddp2 * (i - minY)/(float)abs((dy1));
 
@@ -197,6 +201,7 @@ void Graphics::drawFaceTextured(TransformedFace &face, Scratch3d::Texture &textu
             if (ax > bx){
                 std::swap(ax, bx);
                 std::swap(az, bz);
+                std::swap(aiz, biz);
                 std::swap(ad, bd);
                 std::swap(tex_su, tex_eu);
                 std::swap(tex_sv, tex_ev);
@@ -220,6 +225,8 @@ void Graphics::drawFaceTextured(TransformedFace &face, Scratch3d::Texture &textu
 
                 float z = az;
                 if (bx - ax) z += (bz - az) * (j - ax) / float(bx - ax);
+                float iz = aiz;
+                if (bx - ax) z += (biz - aiz) * (j - ax) / float(bx - ax);
                 float dp = ad;
                 if (bx - ax) dp += (bd - ad) * (j - ax) / float(bx - ax);
 
@@ -227,7 +234,7 @@ void Graphics::drawFaceTextured(TransformedFace &face, Scratch3d::Texture &textu
                 if(zBufferIndex < GetScreenWidth() * GetScreenHeight() && z < zBuffer[zBufferIndex])
                 {
                     zBuffer[zBufferIndex] = z;
-                    Color color = texture.Sample(tex_u, tex_v);
+                    Color color = texture.Sample(tex_u * iz, tex_v * iz);
                     TintColor(color, 1);
                     DrawPixel(j, i, color);
                 }
