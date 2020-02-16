@@ -28,6 +28,7 @@ void Scene::PlayFrame() {
 
         mesh.resetTransformations();
         Update();
+        meshList_[0].translate(0, 0, 2);
         mesh.cullBackFaces();
         mesh.transform(width, height);
     }

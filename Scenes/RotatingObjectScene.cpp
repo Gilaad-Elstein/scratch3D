@@ -16,5 +16,4 @@ void RotatingObjectScene::Update() {
     if (IsKeyDown(KEY_X)) thetaZ += rotationRate * GetFrameTime();
 
     meshList_[0].rotate(thetaX, thetaY, thetaZ);
-    meshList_[0].translate(0, 0, 2);
 }
