@@ -22,15 +22,38 @@ void Scene::ResetZBuffer(){
 void Scene::PlayFrame() {
     ResetZBuffer();
 
+    //camera derivs:
+    Vec3 cameraForward = cameraPos - cameraPointAt;
+    cameraForward.Normalise();
+    Vec3 cameraRight = cameraForward.CrossProduct(cameraUp);
+    cameraRight.Normalise();
+    Vec3 cameraV = cameraRight.CrossProduct(cameraForward);
+
+    Matrix4x4 matCamera;
+    matCamera.m[0][0] = cameraRight.x;
+    matCamera.m[0][1] = cameraRight.y;
+    matCamera.m[0][2] = cameraRight.z;
+    matCamera.m[1][0] = cameraV.x;
+    matCamera.m[1][1] = cameraV.y;
+    matCamera.m[1][2] = cameraV.z;
+    matCamera.m[2][0] = cameraForward.x;
+    matCamera.m[2][1] = cameraForward.y;
+    matCamera.m[2][2] = cameraForward.z;
+    matCamera.m[3][0] = -cameraPos.DotProduct(cameraRight);
+    matCamera.m[3][1] = -cameraPos.DotProduct(cameraV);
+    matCamera.m[3][2] = -cameraPos.DotProduct(cameraForward);
+    matCamera.m[3][3] = 1.0f;
+
     ClearBackground(BLACK);
     BeginDrawing();
     for(auto& mesh : meshList_){
 
         mesh.resetTransformations();
         Update();
-        meshList_[0].translate(0, 0, 2);
+        mesh.translate(0,0,3);
         mesh.cullBackFaces();
-        mesh.transform(width, height);
+        mesh.transform(matCamera);
+        mesh.flatTransform(GetScreenWidth(), GetScreenHeight());
     }
 
     for(auto& mesh : meshList_) {

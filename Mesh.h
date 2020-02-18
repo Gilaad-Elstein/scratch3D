@@ -45,7 +45,7 @@ namespace Scratch3d{
         void translateRaw(float x, float y, float z);
         void rotate(float x, float y, float z);
         void rotateRaw(float x, float y, float z);
-        void transform(int w, int h);
+        void flatTransform(int w, int h);
         void cullBackFaces();
         std::vector<TransformedFace> getTransformedFaces();
         void invertRawXY();
@@ -55,6 +55,7 @@ namespace Scratch3d{
 
         Texture texture;
 
+        void transform(Matrix4x4 m);
     };
 
 }

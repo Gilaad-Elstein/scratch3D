@@ -178,11 +178,17 @@ namespace Scratch3d {
         offsetVertexList(x, y, z, manipulatedNormals);
     }
 
-    void Mesh::transform(int w, int h) {
+    void Mesh::flatTransform(int w, int h) {
         for (auto &vertex : manipulatedVertices) {
             float inverseZ = 1.0f / vertex.z;
             vertex.x = (vertex.x * inverseZ + 1) * static_cast<float>(w) / 2;
             vertex.y = (vertex.y * w/(float)h * inverseZ + 1) * static_cast<float>(h) / 2;
+        }
+    }
+
+    void Mesh::transform(Matrix4x4 m){
+        for (auto &vertex : manipulatedVertices) {
+            vertex *= m;
         }
     }
 

@@ -10,6 +10,11 @@
 
 class Scene {
 protected:
+    //camera controls
+    Vec3 cameraPos{0, 0, -1};
+    Vec3 cameraPointAt{0, 0, 1};
+    Vec3 cameraUp{0, 1, 0};
+
     std::vector<Scratch3d::Mesh> meshList_;
     float* zBuffer = NULL;
     int width = 0, height = 0;
